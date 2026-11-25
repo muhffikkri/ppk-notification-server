@@ -8,8 +8,10 @@ services:
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/serviceAccount.json
       PORT: 8787
+      LOG_FILE: /app/logs/server.log
     volumes:
       - ./serviceAccount.json:/run/secrets/serviceAccount.json:ro
+      - ./logs:/app/logs
     ports:
       - "8787:8787"
     healthcheck:
@@ -18,3 +20,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: ppk-cloudflared
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    depends_on:
+      - push-server

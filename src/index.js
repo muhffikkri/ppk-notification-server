@@ -2,8 +2,31 @@ import 'dotenv/config';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
+import path from 'node:path';
+import util from 'node:util';
 import admin from 'firebase-admin';
 import { leaveEvents, pushMessage, sessionEvents } from './pushEvents.js';
+
+const LOG_FILE = process.env.LOG_FILE || './logs/server.log';
+fs.mkdirSync(path.dirname(LOG_FILE), { recursive: true });
+for (const level of ['log', 'error', 'warn']) {
+  const orig = console[level].bind(console);
+  console[level] = (...args) => {
+    const line = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${args
+      .map((a) => (typeof a === 'string' ? a : util.inspect(a, { depth: 4, breakLength: Infinity })))
+      .join(' ')}\n`;
+    try { fs.appendFileSync(LOG_FILE, line); } catch {}
+    orig(...args);
+  };
+}
+
+process.on('uncaughtException', (err) => {
+  console.error('[fatal] uncaughtException', err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('[fatal] unhandledRejection', err);
+});
 
 const credPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 if (!credPath) {
