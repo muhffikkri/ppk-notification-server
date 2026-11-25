@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log*
+.git
+.env
+.env.*
+!.env.example
+serviceAccount*.json
+credentials*.json
+*.log
+Dockerfile
+docker-compose.yml
+README.md
+scripts

@@ -1,0 +1,20 @@
+services:
+  push-server:
+    build: .
+    container_name: ppk-push-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/serviceAccount.json
+      PORT: 8787
+    volumes:
+      - ./serviceAccount.json:/run/secrets/serviceAccount.json:ro
+    ports:
+      - "8787:8787"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8787/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

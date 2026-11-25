@@ -8,33 +8,43 @@ Server Node.js sederhana untuk push notification PPK (tanpa Firebase Cloud Funct
 - `leave_decided`: `leave_requests/{id}` berubah `pending -> approved/rejected`
 
 ## Setup
-1. Install dependency:
-   ```powershell
-   npm install
-   ```
-2. Copy env:
+1. Copy env:
    ```powershell
    Copy-Item .env.example .env
    ```
-3. Isi `.env`:
-   - `GOOGLE_APPLICATION_CREDENTIALS=./serviceAccount.json`
-   - `EXPO_PUSH_ACCESS_TOKEN=<token dari expo.dev>`
-   - `PORT=8787` (opsional)
+2. Isi `.env`:
+   ```env
+   GOOGLE_APPLICATION_CREDENTIALS=./serviceAccount.json
+   EXPO_PUSH_ACCESS_TOKEN=<token dari expo.dev>
+   PORT=8787
+   ```
+3. Taruh Firebase service account JSON sebagai `serviceAccount.json` di root repo. **Jangan commit file ini.**
 
-4. Taruh Firebase service account JSON di path yang sama dengan `GOOGLE_APPLICATION_CREDENTIALS`. **Jangan commit file ini.**
+## Jalankan dengan Docker (disarankan untuk deploy/WSL)
+```bash
+docker compose up -d --build
+```
+Cek:
+```bash
+docker compose logs -f
+curl http://localhost:8787/health
+```
+Stop:
+```bash
+docker compose down
+```
 
-## Jalankan
+## Jalankan tanpa Docker
 ```powershell
+npm install
 npm start
 ```
 atau one-click:
 - Windows CMD: `scripts\start.cmd`
 - PowerShell: `powershell -ExecutionPolicy Bypass -File scripts\start.ps1`
 
-Healthcheck: `http://localhost:8787/health`
-
 ## Catatan
 - Proses harus selalu berjalan agar real-time.
 - Dedupe saat ini in-memory (reset saat restart).
 - Butuh token device tersimpan di `users/{uid}/push_tokens/{installationId}`.
-- Untuk deploy di PC lab, jalankan lewat Task Scheduler/PM2/NSSM dan expose healthcheck via Cloudflare Tunnel/Tailscale sesuai kebutuhan.
+- `serviceAccount.json` dan `.env` jangan di-commit; di Docker dimount sebagai secret/read-only.
