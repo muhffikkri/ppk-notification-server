@@ -17,20 +17,22 @@ import {
 
 const LOG_FILE = process.env.LOG_FILE || "./logs/server.log";
 fs.mkdirSync(path.dirname(LOG_FILE), { recursive: true });
-for (const level of ["log", "error", "warn"]) {
+for (const level of ["log", "error", "warn", "info", "debug"]) {
   const orig = console[level].bind(console);
   console[level] = (...args) => {
-    const line = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${args
+    const message = args
       .map((a) =>
         typeof a === "string"
           ? a
           : util.inspect(a, { depth: 4, breakLength: Infinity }),
       )
-      .join(" ")}\n`;
+      .join(" ");
+    const stamp = new Date().toISOString();
+    const line = `[${stamp}] [${level.toUpperCase()}] ${message}\n`;
     try {
       fs.appendFileSync(LOG_FILE, line);
     } catch {}
-    orig(...args);
+    orig(`[${stamp}] [${level.toUpperCase()}] ${message}`);
   };
 }
 
